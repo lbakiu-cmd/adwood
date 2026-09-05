@@ -1,25 +1,25 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Environment, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 import ArchitecturalRoom from './ArchitecturalRoom.jsx';
 import AssemblingFurniture from './AssemblingFurniture.jsx';
 
-// Camera controller with smooth lerping along waypoints
+// Camera controller with smooth lerping along cinematic waypoints
 function CameraRig({ scrollProgress }) {
   const { camera, mouse } = useThree();
-  const currentPos = useRef(new THREE.Vector3(0, 3.2, 5.8));
-  const currentLookAt = useRef(new THREE.Vector3(0, 0.4, -4.5));
+  const currentPos = useRef(new THREE.Vector3(0, 3.4, 6.2));
+  const currentLookAt = useRef(new THREE.Vector3(0, 0.5, -4.5));
 
   // Waypoints for camera path
   const waypoints = [
-    { progress: 0.0,  pos: [0.0, 3.2, 5.8],   lookAt: [0.0, 0.4, -4.5] },
-    { progress: 0.35, pos: [-1.8, 1.3, 2.4],  lookAt: [-1.4, -0.2, -3.5] },
-    { progress: 0.70, pos: [1.6, 0.35, 1.0],  lookAt: [0.3, -0.4, -4.2] },
-    { progress: 1.0,  pos: [0.0, 0.45, 2.0],  lookAt: [0.0, 0.1, -4.0] }
+    { progress: 0.0,  pos: [0.0, 3.4, 6.2],   lookAt: [0.0, 0.5, -4.5] },
+    { progress: 0.35, pos: [-2.0, 1.4, 2.6],  lookAt: [-1.4, -0.1, -3.5] },
+    { progress: 0.70, pos: [1.8, 0.45, 1.2],  lookAt: [0.4, -0.3, -4.2] },
+    { progress: 1.0,  pos: [0.0, 0.55, 2.2],  lookAt: [0.0, 0.15, -4.0] }
   ];
 
   useFrame((state, delta) => {
-    // Find surrounding waypoints
     let p = Math.max(0, Math.min(1, scrollProgress));
     let segStart = waypoints[0];
     let segEnd = waypoints[waypoints.length - 1];
@@ -34,7 +34,6 @@ function CameraRig({ scrollProgress }) {
 
     const span = segEnd.progress - segStart.progress;
     const factor = span > 0 ? (p - segStart.progress) / span : 0;
-    // Cubic smoothstep easing between waypoints
     const easeFactor = factor * factor * (3 - 2 * factor);
 
     const targetPos = new THREE.Vector3(
@@ -49,12 +48,11 @@ function CameraRig({ scrollProgress }) {
       THREE.MathUtils.lerp(segStart.lookAt[2], segEnd.lookAt[2], easeFactor)
     );
 
-    // Mouse parallax contribution (subtle)
-    targetPos.x += mouse.x * 0.25;
+    // Subtle tactile mouse parallax
+    targetPos.x += mouse.x * 0.28;
     targetPos.y += mouse.y * 0.18;
 
-    // Smooth lerp (damped)
-    const lerpSpeed = 4.5 * delta;
+    const lerpSpeed = 4.2 * delta;
     currentPos.current.lerp(targetPos, Math.min(1, lerpSpeed));
     currentLookAt.current.lerp(targetLookAt, Math.min(1, lerpSpeed));
 
@@ -70,49 +68,62 @@ export default function SceneCanvas({ scrollProgress = 0 }) {
     <div className="canvas-wrapper">
       <Canvas
         shadows
-        camera={{ position: [0, 3.2, 5.8], fov: 42, near: 0.1, far: 50 }}
+        camera={{ position: [0, 3.4, 6.2], fov: 40, near: 0.1, far: 50 }}
         gl={{
           antialias: true,
           powerPreference: 'high-performance',
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.15
+          toneMappingExposure: 1.2
         }}
         dpr={[1, 2]}
       >
-        {/* Ambient & Studio Fill Lighting */}
-        <ambientLight intensity={0.4} color="#f4ede2" />
+        {/* Environment map for rich metallic, glass, and marble reflections */}
+        <Environment preset="city" environmentIntensity={0.65} />
 
-        {/* Directional Sunbeam through the large window */}
+        {/* Studio Ambient & Sky Fill */}
+        <ambientLight intensity={0.45} color="#f7f2ea" />
+
+        {/* Directional Warm Sunlight through Window */}
         <directionalLight
-          position={[-6, 9, 4]}
-          intensity={1.8}
-          color="#fff2db"
+          position={[-7, 10, 5]}
+          intensity={2.2}
+          color="#fff4e0"
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
           shadow-camera-near={0.5}
-          shadow-camera-far={25}
-          shadow-camera-left={-8}
-          shadow-camera-right={8}
-          shadow-camera-top={8}
-          shadow-camera-bottom={-8}
-          shadow-bias={-0.0004}
+          shadow-camera-far={26}
+          shadow-camera-left={-9}
+          shadow-camera-right={9}
+          shadow-camera-top={9}
+          shadow-camera-bottom={-9}
+          shadow-bias={-0.0003}
         />
 
-        {/* Soft Cool Sky Fill from the Garden */}
+        {/* Soft Cool Exterior Ambient Sky Light */}
         <directionalLight
-          position={[0, 3, -12]}
-          intensity={0.6}
-          color="#b0c8d6"
+          position={[0, 4, -13]}
+          intensity={0.7}
+          color="#b5c9d6"
         />
 
-        {/* Interior Accent Warm Fill */}
+        {/* Studio Interior Fill for Furniture Shadows */}
         <pointLight
-          position={[3, 2.5, -2]}
-          intensity={8}
-          distance={10}
+          position={[3.5, 3.0, -1.5]}
+          intensity={10}
+          distance={12}
           decay={2}
-          color="#ffcca0"
+          color="#ffcca5"
+        />
+
+        {/* Grounding Contact Shadows on Floor */}
+        <ContactShadows
+          position={[0, -1.98, -4.5]}
+          opacity={0.75}
+          scale={16}
+          blur={2.4}
+          far={4}
+          color="#16120e"
         />
 
         {/* Architectural 3D Elements */}
