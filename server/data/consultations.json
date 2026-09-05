@@ -1,0 +1,28 @@
+[
+  {
+    "id": "ADV-MTOSO4M5-75ZF",
+    "createdAt": "2026-09-05T19:47:21.053Z",
+    "status": "received",
+    "fullName": "Elena Rostova",
+    "email": "elena.rostova@atelier-geneve.ch",
+    "phone": "+41 22 819 33 00",
+    "projectType": "Private Villa",
+    "budgetRange": "€600,000 – €1,200,000",
+    "timeline": "Immediate (1-3 mos)",
+    "location": "Cologny, Lake Geneva",
+    "notes": "Complete architectural realization for double-height lakeside villa. Bespoke walnut wall paneling, Italian travertine slabs, and custom acoustic ceiling joinery."
+  },
+  {
+    "id": "ADV-MTOSJOYJ-Q6WE",
+    "createdAt": "2026-09-05T19:43:54.139Z",
+    "status": "received",
+    "fullName": "Julian de Vries",
+    "email": "julian@vries-architects.com",
+    "phone": "+33 1 42 68 55 00",
+    "projectType": "Penthouse & Terrace",
+    "budgetRange": "€500k+",
+    "timeline": "Immediate (1-3 mos)",
+    "location": "Place Vendôme, Paris",
+    "notes": "Bespoke walnut joinery, travertine stone fireplace, double-height ceiling realization."
+  }
+]
